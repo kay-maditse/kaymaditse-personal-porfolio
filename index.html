@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kay Kelebogile Maditse — Cloud Architect</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#000;
+  --blue:#00d4ff;
+  --purple:#a855f7;
+  --green:#00ff88;
+  --red:#ff3366;
+  --amber:#ffaa00;
+  --glass:rgba(0,212,255,0.05);
+  --glass-border:rgba(0,212,255,0.15);
+  --text:#e2e8f0;
+  --muted:#64748b;
+  --font-mono:'Share Tech Mono',monospace;
+  --font-display:'Orbitron',sans-serif;
+  --font-body:'Exo 2',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);overflow-x:hidden;cursor:none;}
+
+/* Custom cursor */
+#cursor{position:fixed;width:12px;height:12px;background:var(--blue);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:transform .1s,background .2s;mix-blend-mode:screen;}
+#cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(0,212,255,0.4);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:all .15s ease;}
+
+/* Canvas */
+#particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:#000;}
+::-webkit-scrollbar-thumb{background:var(--blue);}
+
+/* ─── NAV ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:1.2rem 3rem;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.7);backdrop-filter:blur(20px);border-bottom:1px solid var(--glass-border);}
+.nav-logo{font-family:var(--font-display);font-size:.85rem;color:var(--blue);letter-spacing:.15em;}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{font-family:var(--font-mono);font-size:.75rem;color:var(--muted);text-decoration:none;letter-spacing:.1em;transition:color .3s;}
+.nav-links a:hover{color:var(--blue);}
+.terminal-btn{font-family:var(--font-mono);font-size:.7rem;padding:.4rem 1rem;border:1px solid var(--blue);color:var(--blue);background:transparent;cursor:none;letter-spacing:.1em;transition:all .3s;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);}
+.terminal-btn:hover{background:var(--blue);color:#000;}
+
+/* ─── HERO ─── */
+#hero{position:relative;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;z-index:1;overflow:hidden;}
+
+/* Scanning line */
+.scan-line{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue),transparent);animation:scan 4s linear infinite;opacity:.4;}
+@keyframes scan{0%{top:0;}100%{top:100vh;}}
+
+/* Grid overlay */
+.grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:60px 60px;animation:gridPulse 8s ease-in-out infinite;}
+@keyframes gridPulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+/* Orbit rings */
+.orbit-container{position:absolute;width:600px;height:600px;animation:none;}
+.orbit{position:absolute;border-radius:50%;border:1px solid rgba(0,212,255,0.1);}
+.orbit-1{width:300px;height:300px;top:50%;left:50%;transform:translate(-50%,-50%);animation:orbitSpin 20s linear infinite;}
+.orbit-2{width:450px;height:450px;top:50%;left:50%;transform:translate(-50%,-50%);animation:orbitSpin 35s linear infinite reverse;}
+.orbit-3{width:580px;height:580px;top:50%;left:50%;transform:translate(-50%,-50%);animation:orbitSpin 50s linear infinite;}
+@keyframes orbitSpin{to{transform:translate(-50%,-50%) rotate(360deg);}}
+
+/* Orbit icons */
+.orbit-icon{position:absolute;font-size:1.2rem;top:-12px;left:50%;transform:translateX(-50%);filter:drop-shadow(0 0 6px var(--blue));animation:counterSpin 20s linear infinite;}
+.orbit-icon-2{animation:counterSpin 35s linear infinite reverse;}
+.orbit-icon-3{animation:counterSpin 50s linear infinite;}
+@keyframes counterSpin{to{transform:translateX(-50%) rotate(-360deg);}}
+
+/* Boot sequence */
+#boot-screen{position:absolute;inset:0;background:#000;z-index:100;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:4rem;font-family:var(--font-mono);font-size:.9rem;}
+.boot-line{color:var(--green);opacity:0;margin:.3rem 0;animation:bootIn .1s forwards;}
+.boot-line.blue{color:var(--blue);}
+.boot-line.white{color:#fff;}
+.boot-line.dim{color:var(--muted);}
+@keyframes bootIn{to{opacity:1;}}
+#boot-screen.done{animation:fadeOutBoot .8s forwards;}
+@keyframes fadeOutBoot{to{opacity:0;pointer-events:none;}}
+
+/* Hero content */
+#hero-content{position:relative;z-index:10;opacity:0;animation:heroReveal 1s ease forwards;}
+#hero-content.visible{animation:heroReveal 1s ease forwards;}
+@keyframes heroReveal{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+
+.hero-tag{font-family:var(--font-mono);font-size:.75rem;color:var(--blue);letter-spacing:.3em;margin-bottom:2rem;opacity:.8;}
+.hero-name{font-family:var(--font-display);font-size:clamp(2.5rem,6vw,5rem);font-weight:900;line-height:1.1;margin-bottom:1rem;background:linear-gradient(135deg,#fff 0%,var(--blue) 50%,var(--purple) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(0,212,255,.3));}
+.hero-typewriter{font-family:var(--font-mono);font-size:clamp(1rem,2vw,1.4rem);color:var(--blue);height:2rem;margin-bottom:2.5rem;}
+.typewriter-text{border-right:2px solid var(--blue);padding-right:4px;animation:blink .7s step-end infinite;}
+@keyframes blink{50%{border-color:transparent;}}
+.hero-tagline{font-family:var(--font-display);font-size:clamp(.7rem,1.5vw,1rem);letter-spacing:.3em;color:var(--muted);margin-bottom:3rem;}
+
+.hero-ctas{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;}
+.btn-primary{font-family:var(--font-mono);font-size:.8rem;padding:.8rem 2rem;background:linear-gradient(135deg,var(--blue),var(--purple));color:#000;font-weight:700;letter-spacing:.1em;text-decoration:none;cursor:none;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);transition:filter .3s,transform .2s;}
+.btn-primary:hover{filter:brightness(1.2);transform:translateY(-2px);}
+.btn-outline{font-family:var(--font-mono);font-size:.8rem;padding:.8rem 2rem;border:1px solid var(--blue);color:var(--blue);letter-spacing:.1em;text-decoration:none;cursor:none;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);transition:all .3s;}
+.btn-outline:hover{background:rgba(0,212,255,.1);}
+
+/* Scroll indicator */
+.scroll-hint{position:absolute;bottom:2rem;font-family:var(--font-mono);font-size:.65rem;color:var(--muted);letter-spacing:.2em;display:flex;flex-direction:column;align-items:center;gap:.5rem;animation:scrollBounce 2s ease-in-out infinite;}
+@keyframes scrollBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(8px);}}
+.scroll-arrow{width:1px;height:40px;background:linear-gradient(var(--blue),transparent);}
+
+/* ─── SECTIONS ─── */
+section{position:relative;z-index:1;padding:6rem 2rem;}
+.section-inner{max-width:1100px;margin:0 auto;}
+.section-label{font-family:var(--font-mono);font-size:.7rem;color:var(--blue);letter-spacing:.3em;margin-bottom:.75rem;opacity:.7;}
+.section-title{font-family:var(--font-display);font-size:clamp(1.5rem,3vw,2.5rem);font-weight:700;margin-bottom:3rem;position:relative;display:inline-block;}
+.section-title::after{content:'';position:absolute;bottom:-8px;left:0;width:60%;height:1px;background:linear-gradient(90deg,var(--blue),transparent);}
+
+/* Glitch effect on section titles */
+.glitch{position:relative;}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;height:100%;font-family:var(--font-display);}
+.glitch::before{color:var(--blue);animation:glitch1 4s infinite;clip-path:polygon(0 20%,100% 20%,100% 40%,0 40%);}
+.glitch::after{color:var(--purple);animation:glitch2 4s infinite;clip-path:polygon(0 60%,100% 60%,100% 80%,0 80%);}
+@keyframes glitch1{0%,95%,100%{transform:translateX(0);}96%{transform:translateX(-3px);}98%{transform:translateX(3px);}}
+@keyframes glitch2{0%,95%,100%{transform:translateX(0);}97%{transform:translateX(3px);}99%{transform:translateX(-3px);}}
+
+/* Glass card */
+.glass-card{background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(10px);padding:2rem;position:relative;overflow:hidden;transition:border-color .3s,transform .3s,box-shadow .3s;}
+.glass-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:0;transition:opacity .3s;}
+.glass-card:hover{border-color:rgba(0,212,255,.4);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,212,255,.1);}
+.glass-card:hover::before{opacity:1;}
+
+/* Corner brackets */
+.bracket{position:absolute;width:16px;height:16px;border-color:var(--blue);border-style:solid;opacity:.5;}
+.bracket.tl{top:8px;left:8px;border-width:1px 0 0 1px;}
+.bracket.tr{top:8px;right:8px;border-width:1px 1px 0 0;}
+.bracket.bl{bottom:8px;left:8px;border-width:0 0 1px 1px;}
+.bracket.br{bottom:8px;right:8px;border-width:0 1px 1px 0;}
+
+/* ─── ABOUT ─── */
+#about .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;}
+.about-text p{color:var(--muted);line-height:1.9;margin-bottom:1.2rem;font-weight:300;}
+.about-text p span{color:var(--blue);}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.stat-card{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.1);padding:1.2rem;text-align:center;}
+.stat-num{font-family:var(--font-display);font-size:2rem;font-weight:700;color:var(--blue);}
+.stat-label{font-family:var(--font-mono);font-size:.65rem;color:var(--muted);letter-spacing:.15em;margin-top:.3rem;}
+
+/* ─── LIVE METRICS ─── */
+#metrics{background:linear-gradient(180deg,#000 0%,rgba(0,212,255,.03) 50%,#000 100%);}
+.metrics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1.5rem;}
+.metric-card{text-align:center;padding:2rem 1rem;border:1px solid rgba(0,212,255,.1);position:relative;overflow:hidden;}
+.metric-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);}
+.metric-num{font-family:var(--font-display);font-size:2.5rem;font-weight:900;color:var(--blue);filter:drop-shadow(0 0 10px var(--blue));}
+.metric-label{font-family:var(--font-mono);font-size:.65rem;color:var(--muted);letter-spacing:.15em;margin-top:.5rem;}
+
+/* ─── SKILLS ─── */
+/* Radar */
+.radar-container{display:flex;flex-direction:column;align-items:center;gap:2rem;}
+#radarCanvas{filter:drop-shadow(0 0 20px rgba(0,212,255,.2));}
+.radar-legend{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;}
+.radar-item{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);letter-spacing:.1em;display:flex;align-items:center;gap:.5rem;cursor:none;}
+.radar-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);}
+
+/* Hex grid */
+.hex-grid{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:2rem;}
+.hex-item{width:130px;height:130px;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.15);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1rem;cursor:none;transition:all .3s;position:relative;}
+.hex-item:hover{background:rgba(0,212,255,.15);border-color:var(--blue);transform:scale(1.08);filter:drop-shadow(0 0 12px rgba(0,212,255,.3));}
+.hex-icon{font-size:1.6rem;margin-bottom:.3rem;}
+.hex-label{font-family:var(--font-mono);font-size:.6rem;color:var(--blue);letter-spacing:.1em;}
+
+/* ─── ARCHITECTURE DIAGRAM ─── */
+#arch{background:rgba(0,5,15,1);}
+.arch-diagram{position:relative;width:100%;max-width:800px;margin:0 auto;height:420px;}
+.arch-node{position:absolute;background:rgba(0,0,0,.8);border:1px solid rgba(0,212,255,.3);padding:.8rem 1.2rem;font-family:var(--font-mono);font-size:.7rem;color:var(--blue);text-align:center;cursor:none;transition:all .3s;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);}
+.arch-node:hover{background:rgba(0,212,255,.1);border-color:var(--blue);box-shadow:0 0 20px rgba(0,212,255,.2);}
+.arch-node .node-icon{font-size:1.5rem;display:block;margin-bottom:.3rem;}
+.arch-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+
+/* ─── CERTIFICATIONS ─── */
+.cert-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;}
+.cert-card{padding:1.5rem 2rem;border-left:2px solid var(--blue);background:rgba(0,212,255,.03);position:relative;transition:all .3s;}
+.cert-card:hover{background:rgba(0,212,255,.07);transform:translateX(6px);}
+.cert-badge{font-family:var(--font-mono);font-size:.6rem;color:var(--green);letter-spacing:.15em;margin-bottom:.5rem;}
+.cert-name{font-family:var(--font-display);font-size:.9rem;font-weight:700;color:#fff;margin-bottom:.3rem;}
+.cert-issuer{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);}
+
+/* ─── PROJECTS ─── */
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:2rem;}
+.project-card{position:relative;overflow:hidden;cursor:none;}
+.project-card-inner{background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.1);padding:2rem;height:100%;transition:all .4s;position:relative;}
+.project-card:hover .project-card-inner{border-color:rgba(0,212,255,.4);box-shadow:0 0 40px rgba(0,212,255,.08);}
+.project-card::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,212,255,.04),transparent);transition:left .5s;z-index:1;pointer-events:none;}
+.project-card:hover::before{left:100%;}
+.project-num{font-family:var(--font-display);font-size:3rem;font-weight:900;color:rgba(0,212,255,.07);position:absolute;top:1rem;right:1.5rem;line-height:1;}
+.project-category{font-family:var(--font-mono);font-size:.65rem;color:var(--blue);letter-spacing:.2em;margin-bottom:.75rem;}
+.project-title{font-family:var(--font-display);font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.75rem;line-height:1.3;}
+.project-desc{font-family:var(--font-body);font-size:.85rem;color:var(--muted);line-height:1.7;margin-bottom:1.5rem;}
+.project-tags{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem;}
+.tag{font-family:var(--font-mono);font-size:.6rem;padding:.25rem .65rem;border:1px solid rgba(0,212,255,.2);color:var(--blue);letter-spacing:.1em;}
+.tag.purple{border-color:rgba(168,85,247,.3);color:var(--purple);}
+.tag.green{border-color:rgba(0,255,136,.2);color:var(--green);}
+.tag.amber{border-color:rgba(255,170,0,.2);color:var(--amber);}
+.project-link{font-family:var(--font-mono);font-size:.7rem;color:var(--blue);text-decoration:none;letter-spacing:.1em;display:flex;align-items:center;gap:.5rem;transition:gap .3s;}
+.project-link:hover{gap:1rem;}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;margin-right:.5rem;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,255,136,.4);}50%{opacity:.8;box-shadow:0 0 0 6px transparent;}}
+
+/* ─── PHILOSOPHY ─── */
+.philosophy-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem;}
+.philosophy-item{padding:1.5rem;border-top:1px solid rgba(0,212,255,.2);position:relative;}
+.philosophy-num{font-family:var(--font-display);font-size:.7rem;color:var(--blue);letter-spacing:.2em;margin-bottom:.75rem;}
+.philosophy-title{font-family:var(--font-display);font-size:.95rem;font-weight:700;color:#fff;margin-bottom:.5rem;}
+.philosophy-text{font-family:var(--font-body);font-size:.82rem;color:var(--muted);line-height:1.6;}
+
+/* ─── WHY CLOUD ─── */
+#why{background:radial-gradient(ellipse at center,rgba(0,212,255,.04) 0%,transparent 70%);}
+.why-quote{font-family:var(--font-display);font-size:clamp(1rem,2.5vw,1.6rem);font-weight:400;line-height:1.8;color:var(--muted);text-align:center;max-width:800px;margin:0 auto;}
+.why-quote span{color:#fff;}
+.why-quote em{color:var(--blue);font-style:normal;}
+
+/* ─── CONTACT ─── */
+.contact-wrapper{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
+.contact-info{display:flex;flex-direction:column;gap:1.5rem;}
+.contact-item{display:flex;align-items:center;gap:1rem;font-family:var(--font-mono);font-size:.8rem;color:var(--muted);}
+.contact-item a{color:var(--blue);text-decoration:none;transition:color .3s;}
+.contact-item a:hover{color:#fff;}
+.contact-icon{width:36px;height:36px;border:1px solid rgba(0,212,255,.2);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.contact-form{display:flex;flex-direction:column;gap:1rem;}
+.contact-form input,.contact-form textarea{background:rgba(0,212,255,.03);border:1px solid rgba(0,212,255,.15);color:#fff;padding:.8rem 1.2rem;font-family:var(--font-mono);font-size:.8rem;outline:none;transition:border-color .3s;resize:none;}
+.contact-form input:focus,.contact-form textarea:focus{border-color:rgba(0,212,255,.5);}
+.contact-form input::placeholder,.contact-form textarea::placeholder{color:var(--muted);}
+.contact-form textarea{height:120px;}
+.submit-btn{font-family:var(--font-mono);font-size:.8rem;padding:.9rem 2rem;background:linear-gradient(135deg,var(--blue),var(--purple));color:#000;font-weight:700;letter-spacing:.15em;border:none;cursor:none;clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);transition:filter .3s;align-self:flex-start;}
+.submit-btn:hover{filter:brightness(1.2);}
+
+/* ─── FOOTER ─── */
+footer{border-top:1px solid rgba(0,212,255,.1);padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:.65rem;color:var(--muted);position:relative;z-index:1;}
+
+/* ─── TERMINAL MODAL ─── */
+#terminal-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);}
+#terminal-modal.open{display:flex;}
+.terminal-window{width:min(700px,90vw);background:#000;border:1px solid rgba(0,212,255,.3);font-family:var(--font-mono);box-shadow:0 0 60px rgba(0,212,255,.15);}
+.terminal-title-bar{padding:.6rem 1rem;background:rgba(0,212,255,.07);border-bottom:1px solid rgba(0,212,255,.2);display:flex;align-items:center;justify-content:space-between;}
+.terminal-dots{display:flex;gap:.4rem;}
+.terminal-dots span{width:10px;height:10px;border-radius:50%;}
+.t-dot-r{background:#ff5f57;}
+.t-dot-y{background:#ffbd2e;}
+.t-dot-g{background:#28c840;}
+.terminal-title-text{font-size:.7rem;color:var(--blue);letter-spacing:.15em;}
+.terminal-close{font-size:1rem;color:var(--muted);cursor:none;background:none;border:none;color:var(--muted);}
+.terminal-close:hover{color:#fff;}
+.terminal-body{padding:1.5rem;height:380px;overflow-y:auto;font-size:.82rem;}
+.t-line{margin:.2rem 0;line-height:1.6;}
+.t-green{color:var(--green);}
+.t-blue{color:var(--blue);}
+.t-white{color:#fff;}
+.t-muted{color:var(--muted);}
+.t-purple{color:var(--purple);}
+.t-amber{color:var(--amber);}
+.terminal-input-row{display:flex;align-items:center;gap:.5rem;padding:.75rem 1.5rem;border-top:1px solid rgba(0,212,255,.1);}
+.terminal-prompt{color:var(--green);font-size:.82rem;white-space:nowrap;}
+#terminal-input{background:transparent;border:none;color:#fff;font-family:var(--font-mono);font-size:.82rem;flex:1;outline:none;caret-color:var(--blue);}
+
+/* ─── SECTION DIVIDER ─── */
+.divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,.2),transparent);margin:0;}
+
+/* ─── SCROLL REVEAL ─── */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  nav{padding:1rem 1.5rem;}
+  .nav-links{display:none;}
+  #about .about-grid,.contact-wrapper{grid-template-columns:1fr;}
+  .arch-diagram{height:500px;}
+  section{padding:4rem 1.5rem;}
+  footer{flex-direction:column;gap:1rem;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- Particle canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- Terminal modal -->
+<div id="terminal-modal">
+  <div class="terminal-window">
+    <div class="terminal-title-bar">
+      <div class="terminal-dots">
+        <span class="t-dot-r"></span>
+        <span class="t-dot-y"></span>
+        <span class="t-dot-g"></span>
+      </div>
+      <span class="terminal-title-text">KAY@CLOUD-COMMAND:~$</span>
+      <button class="terminal-close" onclick="closeTerminal()">✕</button>
+    </div>
+    <div class="terminal-body" id="terminal-output">
+      <div class="t-line t-green">Cloud Command Terminal v1.0</div>
+      <div class="t-line t-muted">Type <span class="t-blue">help</span> to see available commands.</div>
+      <div class="t-line">&nbsp;</div>
+    </div>
+    <div class="terminal-input-row">
+      <span class="terminal-prompt">kay@portfolio:~$&nbsp;</span>
+      <input type="text" id="terminal-input" placeholder="enter command..." autocomplete="off" spellcheck="false"/>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">KAY.MADITSE</div>
+  <ul class="nav-links">
+    <li><a href="#about">ABOUT</a></li>
+    <li><a href="#skills">SKILLS</a></li>
+    <li><a href="#projects">PROJECTS</a></li>
+    <li><a href="#certifications">CERTS</a></li>
+    <li><a href="#contact">CONTACT</a></li>
+  </ul>
+  <button class="terminal-btn" onclick="openTerminal()">⌨ TERMINAL</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="scan-line"></div>
+  <div class="grid-overlay"></div>
+
+  <!-- Boot screen -->
+  <div id="boot-screen">
+    <div class="boot-line dim" style="animation-delay:.2s">[ SYSTEM BOOT ] AWS Portfolio OS v2.0</div>
+    <div class="boot-line dim" style="animation-delay:.6s">Initializing secure connection...</div>
+    <div class="boot-line green" style="animation-delay:1s">✓ Cloud infrastructure modules loaded</div>
+    <div class="boot-line green" style="animation-delay:1.4s">✓ Serverless runtime environment ready</div>
+    <div class="boot-line green" style="animation-delay:1.8s">✓ Lambda functions standing by</div>
+    <div class="boot-line green" style="animation-delay:2.2s">✓ DynamoDB connections established</div>
+    <div class="boot-line blue" style="animation-delay:2.7s">Loading cloud architecture...</div>
+    <div class="boot-line blue" style="animation-delay:3.1s">Authenticating engineer credentials...</div>
+    <div class="boot-line white" style="animation-delay:3.6s;font-size:1.1rem;">ACCESS GRANTED.</div>
+  </div>
+
+  <!-- Orbit rings -->
+  <div class="orbit-container" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+    <div class="orbit orbit-1"><span class="orbit-icon">☁</span></div>
+    <div class="orbit orbit-2"><span class="orbit-icon orbit-icon-2">⚡</span></div>
+    <div class="orbit orbit-3"><span class="orbit-icon orbit-icon-3">🛡</span></div>
+  </div>
+
+  <!-- Hero content -->
+  <div id="hero-content">
+    <div class="hero-tag">// AWS RE/START GRADUATE · CLOUD ENGINEER · JOHANNESBURG, ZA</div>
+    <h1 class="hero-name">Kay Kelebogile<br/>Maditse</h1>
+    <div class="hero-typewriter"><span class="typewriter-text" id="typewriter"></span></div>
+    <div class="hero-tagline">CLOUD. AUTOMATION. SCALE.</div>
+    <div class="hero-ctas">
+      <a href="#projects" class="btn-primary">VIEW PROJECTS</a>
+      <a href="#contact" class="btn-outline">ESTABLISH CONTACT</a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span>SCROLL</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LIVE METRICS -->
+<section id="metrics">
+  <div class="section-inner">
+    <div class="section-label">// SYSTEM METRICS</div>
+    <div class="metrics-grid">
+      <div class="metric-card reveal">
+        <div class="metric-num" data-target="5">0</div>
+        <div class="metric-label">PROJECTS DEPLOYED</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-num" data-target="14">0</div>
+        <div class="metric-label">AWS SERVICES USED</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-num" data-target="6">0</div>
+        <div class="metric-label">CERTIFICATIONS EARNED</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-num" data-target="3">0</div>
+        <div class="metric-label">REGIONS EXPLORED</div>
+      </div>
+      <div class="metric-card reveal">
+        <div class="metric-num" data-target="100">0</div>
+        <div class="metric-label">FREE TIER OPTIMIZED %</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <div class="section-label">// ENGINEER PROFILE</div>
+    <h2 class="section-title glitch" data-text="About Me">About Me</h2>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>I'm a <span>cloud engineer</span> and <span>AWS re/Start graduate</span> based in Johannesburg, driven by a deep fascination with scalable systems, serverless architecture, and the power of automation to transform how businesses operate.</p>
+        <p>Cloud computing captivates me because of its ability to <em style="color:var(--blue);font-style:normal;">scale up or down within minutes</em>, while remaining cost-efficient through pay-as-you-go models. What excites me most is how AWS brings together compute, storage, AI, and machine learning into one unified ecosystem.</p>
+        <p>I also operate at the command line — navigating systems, managing services, editing configurations, and deploying applications with precision. I sometimes call myself an <span>"Operating System Wizard"</span> because the CLI gives me a deeper sense of control over every layer of infrastructure.</p>
+        <p>Currently a <span>Junior Web Developer Intern at CAPACITI</span>, I'm building toward a career as a Solutions Architect — engineering cloud systems with performance, security, and scale at their core.</p>
+      </div>
+      <div class="reveal">
+        <div class="stat-grid">
+          <div class="stat-card glass-card">
+            <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+            <div class="stat-num">AWS</div>
+            <div class="stat-label">RE/START GRADUATE</div>
+          </div>
+          <div class="stat-card glass-card">
+            <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+            <div class="stat-num">CCP</div>
+            <div class="stat-label">CERTIFIED</div>
+          </div>
+          <div class="stat-card glass-card">
+            <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+            <div class="stat-num">FS</div>
+            <div class="stat-label">FULL STACK DEV</div>
+          </div>
+          <div class="stat-card glass-card">
+            <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+            <div class="stat-num">JHB</div>
+            <div class="stat-label">JOHANNESBURG ZA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-inner">
+    <div class="section-label">// OPERATIONAL KNOWLEDGE MATRIX</div>
+    <h2 class="section-title glitch" data-text="Core Competencies">Core Competencies</h2>
+
+    <!-- Radar -->
+    <div class="radar-container reveal">
+      <canvas id="radarCanvas" width="380" height="380"></canvas>
+      <div class="radar-legend">
+        <div class="radar-item"><div class="radar-dot" style="background:var(--blue)"></div>Cloud (AWS)</div>
+        <div class="radar-item"><div class="radar-dot" style="background:var(--purple)"></div>DevOps</div>
+        <div class="radar-item"><div class="radar-dot" style="background:var(--green)"></div>Linux / OS</div>
+        <div class="radar-item"><div class="radar-dot" style="background:var(--amber)"></div>Networking</div>
+        <div class="radar-item"><div class="radar-dot" style="background:var(--red)"></div>Security</div>
+        <div class="radar-item"><div class="radar-dot" style="background:#fff)"></div>Development</div>
+      </div>
+    </div>
+
+    <!-- Hex grid -->
+    <div class="hex-grid reveal" style="margin-top:3rem;">
+      <div class="hex-item"><div class="hex-icon">⚡</div><div class="hex-label">LAMBDA</div></div>
+      <div class="hex-item"><div class="hex-icon">🗄</div><div class="hex-label">DYNAMODB</div></div>
+      <div class="hex-item"><div class="hex-icon">🪣</div><div class="hex-label">S3</div></div>
+      <div class="hex-item"><div class="hex-icon">🔐</div><div class="hex-label">IAM</div></div>
+      <div class="hex-item"><div class="hex-icon">🌐</div><div class="hex-label">CLOUDFRONT</div></div>
+      <div class="hex-item"><div class="hex-icon">🔗</div><div class="hex-label">API GATEWAY</div></div>
+      <div class="hex-item"><div class="hex-icon">🐧</div><div class="hex-label">LINUX CLI</div></div>
+      <div class="hex-item"><div class="hex-icon">📡</div><div class="hex-label">NETWORKING</div></div>
+      <div class="hex-item"><div class="hex-icon">🔄</div><div class="hex-label">CI/CD</div></div>
+      <div class="hex-item"><div class="hex-icon">🐍</div><div class="hex-label">PYTHON</div></div>
+      <div class="hex-item"><div class="hex-icon">☕</div><div class="hex-label">JAVASCRIPT</div></div>
+      <div class="hex-item"><div class="hex-icon">📊</div><div class="hex-label">CLOUDWATCH</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LIVE ARCHITECTURE -->
+<section id="arch">
+  <div class="section-inner">
+    <div class="section-label">// LIVE INFRASTRUCTURE OVERVIEW</div>
+    <h2 class="section-title glitch" data-text="Architecture">Architecture</h2>
+    <div class="arch-diagram reveal">
+      <svg class="arch-svg" id="arch-svg"></svg>
+      <!-- Nodes -->
+      <div class="arch-node" style="left:50%;top:0;transform:translateX(-50%)" id="an-user"><span class="node-icon">👤</span>USER</div>
+      <div class="arch-node" style="left:50%;top:18%;transform:translateX(-50%)" id="an-cf"><span class="node-icon">🌐</span>CLOUDFRONT</div>
+      <div class="arch-node" style="left:10%;top:38%" id="an-s3"><span class="node-icon">🪣</span>S3</div>
+      <div class="arch-node" style="left:50%;top:38%;transform:translateX(-50%)" id="an-apigw"><span class="node-icon">🔗</span>API GATEWAY</div>
+      <div class="arch-node" style="right:10%;top:38%" id="an-r53"><span class="node-icon">🌍</span>ROUTE 53</div>
+      <div class="arch-node" style="left:25%;top:62%" id="an-lambda"><span class="node-icon">⚡</span>LAMBDA</div>
+      <div class="arch-node" style="right:25%;top:62%" id="an-sns"><span class="node-icon">📣</span>SNS / SES</div>
+      <div class="arch-node" style="left:50%;top:82%;transform:translateX(-50%)" id="an-db"><span class="node-icon">🗄</span>DYNAMODB</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="section-inner">
+    <div class="section-label">// CREDENTIALS & TRAINING</div>
+    <h2 class="section-title glitch" data-text="Certifications">Certifications</h2>
+    <div class="cert-grid reveal">
+      <div class="cert-card">
+        <div class="cert-badge">✓ VERIFIED · AWS</div>
+        <div class="cert-name">AWS Certified Cloud Practitioner</div>
+        <div class="cert-issuer">Amazon Web Services · Digital Badge Earned</div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-badge">✓ GRADUATE · AWS</div>
+        <div class="cert-name">AWS re/Start Programme Graduate</div>
+        <div class="cert-issuer">Amazon Web Services · Cloud Engineering Track</div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-badge">✓ CERTIFIED · COURSERA</div>
+        <div class="cert-name">Full Stack JavaScript Developer</div>
+        <div class="cert-issuer">Coursera · Frontend & Backend Engineering</div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-badge">✓ CERTIFIED · COURSERA</div>
+        <div class="cert-name">Python Programming Certification</div>
+        <div class="cert-issuer">Coursera · Scripting & Automation</div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-badge">✓ CERTIFIED</div>
+        <div class="cert-name">AI & Quality Assurance Certificate</div>
+        <div class="cert-issuer">AI Engineering & Software Testing</div>
+      </div>
+      <div class="cert-card">
+        <div class="cert-badge">✓ GRADUATE · UMUZI ACADEMY</div>
+        <div class="cert-name">Full Stack Developer Apprenticeship</div>
+        <div class="cert-issuer">Umuzi Academy · Production-Grade Development</div>
+      </div>
+    </div>
+    <div style="margin-top:2rem;padding:1rem 1.5rem;border:1px dashed rgba(0,212,255,.2);font-family:var(--font-mono);font-size:.75rem;color:var(--muted);display:inline-block;">
+      <span class="status-dot"></span>ADVANCING TOWARD: AWS Solutions Architect Associate
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-inner">
+    <div class="section-label">// DEPLOYED SYSTEMS</div>
+    <h2 class="section-title glitch" data-text="Projects">Projects</h2>
+    <div class="projects-grid">
+
+      <div class="project-card reveal glass-card">
+        <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+        <div class="project-num">01</div>
+        <div class="project-category">SERVERLESS · COMMUNICATION</div>
+        <div class="project-title">Intelligent Contact & Enquiry Engine</div>
+        <div class="project-desc">A serverless communication layer that processes portfolio enquiries in real time. Form submissions are routed through API Gateway, validated and processed by Lambda, then delivered via Amazon SES — zero servers, zero idle cost.</div>
+        <div class="project-tags">
+          <span class="tag">Lambda</span><span class="tag">API Gateway</span><span class="tag purple">SES</span><span class="tag green">IAM</span>
+        </div>
+        <a href="#" class="project-link"><span class="status-dot"></span>VIEW PROJECT →</a>
+      </div>
+
+      <div class="project-card reveal glass-card">
+        <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+        <div class="project-num">02</div>
+        <div class="project-category">SERVERLESS · ANALYTICS</div>
+        <div class="project-title">Global Visitor Telemetry System</div>
+        <div class="project-desc">A real-time visitor tracking system powered entirely by serverless compute and NoSQL storage. Every page visit triggers a Lambda function that atomically increments a DynamoDB counter — demonstrating event-driven architecture at its simplest.</div>
+        <div class="project-tags">
+          <span class="tag">DynamoDB</span><span class="tag">Lambda</span><span class="tag purple">API Gateway</span><span class="tag green">CloudWatch</span>
+        </div>
+        <a href="#" class="project-link"><span class="status-dot"></span>VIEW PROJECT →</a>
+      </div>
+
+      <div class="project-card reveal glass-card">
+        <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+        <div class="project-num">03</div>
+        <div class="project-category">FINTECH · EVENT-DRIVEN</div>
+        <div class="project-title">Serverless Banking Alert & Fraud Detection System</div>
+        <div class="project-desc">A mock fintech notification platform simulating real banking cloud infrastructure. Transaction data triggers Lambda processing, SNS broadcasts fraud alerts, and all events are persisted in DynamoDB — mirroring how modern banks operate on AWS.</div>
+        <div class="project-tags">
+          <span class="tag">Lambda</span><span class="tag amber">SNS</span><span class="tag">DynamoDB</span><span class="tag purple">API Gateway</span><span class="tag green">IAM</span>
+        </div>
+        <a href="#" class="project-link"><span class="status-dot"></span>VIEW PROJECT →</a>
+      </div>
+
+      <div class="project-card reveal glass-card">
+        <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+        <div class="project-num">04</div>
+        <div class="project-category">CLOUD STORAGE · SECURITY</div>
+        <div class="project-title">Secure Cloud File Upload & Distribution Portal</div>
+        <div class="project-desc">A secure, policy-driven file upload system leveraging S3 presigned URLs, IAM least-privilege policies, Lambda event triggers, and CloudFront distribution. Demonstrates cloud storage security awareness critical to banking environments.</div>
+        <div class="project-tags">
+          <span class="tag">S3</span><span class="tag purple">CloudFront</span><span class="tag green">IAM</span><span class="tag">Lambda</span><span class="tag amber">Cognito</span>
+        </div>
+        <a href="#" class="project-link"><span class="status-dot"></span>VIEW PROJECT →</a>
+      </div>
+
+      <div class="project-card reveal glass-card">
+        <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+        <div class="project-num">05</div>
+        <div class="project-category">DEVOPS · AUTOMATION</div>
+        <div class="project-title">Automated Cloud Deployment Pipeline</div>
+        <div class="project-desc">A fully automated CI/CD pipeline that deploys application updates on every code push. GitHub triggers CodePipeline, CodeBuild compiles and tests, and Elastic Beanstalk serves the application — demonstrating engineering maturity and deployment automation.</div>
+        <div class="project-tags">
+          <span class="tag">CodePipeline</span><span class="tag purple">CodeBuild</span><span class="tag green">Elastic Beanstalk</span><span class="tag amber">GitHub</span>
+        </div>
+        <a href="#" class="project-link"><span class="status-dot"></span>VIEW PROJECT →</a>
+      </div>
+
+      <div class="project-card reveal glass-card">
+        <div class="bracket tl"></div><div class="bracket tr"></div><div class="bracket bl"></div><div class="bracket br"></div>
+        <div class="project-num">06</div>
+        <div class="project-category">SERVERLESS · KNOWLEDGE</div>
+        <div class="project-title">AWS Cloud Knowledge Assessment Engine</div>
+        <div class="project-desc">An interactive quiz platform serving AWS certification questions from DynamoDB via Lambda REST APIs. Tests cloud fundamentals across compute, storage, networking, and security — built entirely on the services it quizzes you on.</div>
+        <div class="project-tags">
+          <span class="tag">DynamoDB</span><span class="tag">Lambda</span><span class="tag purple">API Gateway</span><span class="tag green">S3</span>
+        </div>
+        <a href="#" class="project-link"><span class="status-dot"></span>VIEW PROJECT →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PHILOSOPHY -->
+<section id="philosophy">
+  <div class="section-inner">
+    <div class="section-label">// ARCHITECTURE PHILOSOPHY</div>
+    <h2 class="section-title glitch" data-text="Design Principles">Design Principles</h2>
+    <div class="philosophy-grid reveal">
+      <div class="philosophy-item">
+        <div class="philosophy-num">01 ——</div>
+        <div class="philosophy-title">Scalability First</div>
+        <div class="philosophy-text">Systems must be designed to scale horizontally without architectural changes. Build for tomorrow's load, not today's.</div>
+      </div>
+      <div class="philosophy-item">
+        <div class="philosophy-num">02 ——</div>
+        <div class="philosophy-title">Security by Design</div>
+        <div class="philosophy-text">Least privilege, encryption at rest and in transit, and IAM precision — security is not an afterthought, it is the foundation.</div>
+      </div>
+      <div class="philosophy-item">
+        <div class="philosophy-num">03 ——</div>
+        <div class="philosophy-title">Cost-Conscious Infrastructure</div>
+        <div class="philosophy-text">Every architecture decision has a financial dimension. Serverless, pay-as-you-go, and free-tier optimization are engineering disciplines.</div>
+      </div>
+      <div class="philosophy-item">
+        <div class="philosophy-num">04 ——</div>
+        <div class="philosophy-title">Automation Everywhere</div>
+        <div class="philosophy-text">If a human is doing it repeatedly, it should be automated. CI/CD, infrastructure as code, and event-driven systems replace manual operations.</div>
+      </div>
+      <div class="philosophy-item">
+        <div class="philosophy-num">05 ——</div>
+        <div class="philosophy-title">High Availability Thinking</div>
+        <div class="philosophy-text">Design for failure. Multi-region redundancy, graceful degradation, and chaos-resilient architectures keep systems alive when things go wrong.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- WHY CLOUD -->
+<section id="why">
+  <div class="section-inner" style="text-align:center;">
+    <div class="section-label" style="text-align:center;justify-content:center;display:flex;">// WHY CLOUD</div>
+    <h2 class="section-title glitch" data-text="The Mission" style="display:block;text-align:center;margin-bottom:3rem;">The Mission</h2>
+    <div class="why-quote reveal">
+      <span>"Cloud computing isn't just technology —</span> it's the infrastructure of <em>human ambition</em>.
+      The ability to <span>scale a system in minutes</span>, serve millions without a single physical server,
+      and build <em>intelligent platforms</em> that adapt in real time — this is what drives me.
+      I'm not learning cloud. <span>I'm engineering the future.</span>"
+    </div>
+    <div style="margin-top:3rem;font-family:var(--font-mono);font-size:.75rem;color:var(--blue);letter-spacing:.3em;">— KAY KELEBOGILE MADITSE</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="section-label">// ESTABLISH CONTACT</div>
+    <h2 class="section-title glitch" data-text="Contact">Contact</h2>
+    <div class="contact-wrapper">
+      <div class="contact-info reveal">
+        <p style="font-family:var(--font-body);color:var(--muted);line-height:1.8;margin-bottom:1rem;">Open to cloud learnerships, engineering roles, and collaboration opportunities. Let's build something remarkable.</p>
+        <div class="contact-item">
+          <div class="contact-icon">✉</div>
+          <a href="mailto:maditse.kay.kelebogile@gmail.com">maditse.kay.kelebogile@gmail.com</a>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">in</div>
+          <a href="http://www.linkedin.com/in/kay-maditse" target="_blank">linkedin.com/in/kay-maditse</a>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">{ }</div>
+          <a href="https://github.com/kay-maditse" target="_blank">github.com/kay-maditse</a>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <span>Johannesburg, Gauteng, South Africa</span>
+        </div>
+      </div>
+      <div class="contact-form reveal">
+        <input type="text" placeholder="YOUR NAME" />
+        <input type="email" placeholder="YOUR EMAIL" />
+        <input type="text" placeholder="SUBJECT" />
+        <textarea placeholder="YOUR MESSAGE"></textarea>
+        <button class="submit-btn">TRANSMIT MESSAGE ⟶</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div style="font-family:var(--font-display);font-size:.7rem;color:var(--blue);">KAY KELEBOGILE MADITSE</div>
+  <div>© 2025 · ENGINEERED ON AWS · JOHANNESBURG, ZA</div>
+  <div style="color:var(--blue);">CLOUD. AUTOMATION. SCALE.</div>
+</footer>
+
+<script>
+// ─── CURSOR ───
+const cursor = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cursor.style.left=mx+'px'; cursor.style.top=my+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*.12; ry+=(my-ry)*.12;
+  cursorRing.style.left=rx+'px'; cursorRing.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,button,.hex-item,.project-card,.cert-card,.arch-node').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.transform='translate(-50%,-50%) scale(2)';cursorRing.style.transform='translate(-50%,-50%) scale(1.4)';});
+  el.addEventListener('mouseleave',()=>{cursor.style.transform='translate(-50%,-50%) scale(1)';cursorRing.style.transform='translate(-50%,-50%) scale(1)';});
+});
+
+// ─── PARTICLES ───
+const canvas=document.getElementById('particle-canvas');
+const ctx=canvas.getContext('2d');
+let W,H,particles=[];
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+resize(); window.addEventListener('resize',resize);
+function Particle(){
+  this.x=Math.random()*W; this.y=Math.random()*H;
+  this.vx=(Math.random()-.5)*.3; this.vy=(Math.random()-.5)*.3;
+  this.r=Math.random()*1.5+.5;
+  this.a=Math.random()*.4+.1;
+}
+for(let i=0;i<120;i++) particles.push(new Particle());
+function drawParticles(){
+  ctx.clearRect(0,0,W,H);
+  particles.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0||p.x>W) p.vx*=-1;
+    if(p.y<0||p.y>H) p.vy*=-1;
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(0,212,255,${p.a})`;
+    ctx.fill();
+  });
+  // Draw connections
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const dx=particles[i].x-particles[j].x;
+      const dy=particles[i].y-particles[j].y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<120){
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.lineTo(particles[j].x,particles[j].y);
+        ctx.strokeStyle=`rgba(0,212,255,${.06*(1-dist/120)})`;
+        ctx.lineWidth=.5;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// ─── BOOT SEQUENCE ───
+const heroContent=document.getElementById('hero-content');
+const bootScreen=document.getElementById('boot-screen');
+setTimeout(()=>{
+  bootScreen.classList.add('done');
+  setTimeout(()=>{
+    bootScreen.style.display='none';
+    heroContent.style.opacity='1';
+  },800);
+},4200);
+
+// ─── TYPEWRITER ───
+const roles=['Cloud Engineer','DevOps Enthusiast','Cloud Security Analyst','Serverless Builder','Operating System Wizard','Solutions Architect','Aspiring CTO'];
+let roleIdx=0,charIdx=0,deleting=false,waiting=false;
+const tw=document.getElementById('typewriter');
+function type(){
+  if(waiting){return;}
+  const role=roles[roleIdx];
+  if(!deleting){
+    tw.textContent=role.substring(0,charIdx+1);
+    charIdx++;
+    if(charIdx===role.length){
+      waiting=true;
+      setTimeout(()=>{waiting=false;deleting=true;},roleIdx===roles.length-1?20000:2200);
+    } else {setTimeout(type,80);}
+  } else {
+    tw.textContent=role.substring(0,charIdx-1);
+    charIdx--;
+    if(charIdx===0){
+      deleting=false;
+      roleIdx=(roleIdx+1)%roles.length;
+    }
+    setTimeout(type,40);
+  }
+}
+setTimeout(type,4500);
+
+// ─── SCROLL REVEAL ───
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+},{threshold:.1});
+reveals.forEach(r=>observer.observe(r));
+
+// ─── COUNTER ANIMATION ───
+function animCounter(el,target){
+  let current=0;
+  const step=Math.ceil(target/40);
+  const interval=setInterval(()=>{
+    current=Math.min(current+step,target);
+    el.textContent=current+(el.dataset.suffix||'');
+    if(current>=target) clearInterval(interval);
+  },40);
+}
+const metricObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.metric-num').forEach(el=>{
+        animCounter(el,parseInt(el.dataset.target));
+      });
+      metricObs.unobserve(e.target);
+    }
+  });
+},{threshold:.3});
+document.querySelectorAll('#metrics').forEach(s=>metricObs.observe(s));
+
+// ─── RADAR CHART ───
+function drawRadar(){
+  const c=document.getElementById('radarCanvas');
+  if(!c) return;
+  const ctx2=c.getContext('2d');
+  const cx=190,cy=190,r=140;
+  const cats=['Cloud\n(AWS)','DevOps','Linux/OS','Networking','Security','Development'];
+  const vals=[92,78,88,75,72,85];
+  const colors=['#00d4ff','#a855f7','#00ff88','#ffaa00','#ff3366','#fff'];
+  const n=cats.length;
+  ctx2.clearRect(0,0,380,380);
+  // Rings
+  for(let i=1;i<=5;i++){
+    ctx2.beginPath();
+    for(let j=0;j<n;j++){
+      const angle=(j*2*Math.PI/n)-Math.PI/2;
+      const rad=r*(i/5);
+      const x=cx+rad*Math.cos(angle);
+      const y=cy+rad*Math.sin(angle);
+      j===0?ctx2.moveTo(x,y):ctx2.lineTo(x,y);
+    }
+    ctx2.closePath();
+    ctx2.strokeStyle=`rgba(0,212,255,${.05+i*.03})`;
+    ctx2.lineWidth=.5;
+    ctx2.stroke();
+  }
+  // Axes
+  for(let j=0;j<n;j++){
+    const angle=(j*2*Math.PI/n)-Math.PI/2;
+    ctx2.beginPath();
+    ctx2.moveTo(cx,cy);
+    ctx2.lineTo(cx+r*Math.cos(angle),cy+r*Math.sin(angle));
+    ctx2.strokeStyle='rgba(0,212,255,.15)';
+    ctx2.lineWidth=.5;
+    ctx2.stroke();
+  }
+  // Data polygon
+  ctx2.beginPath();
+  for(let j=0;j<n;j++){
+    const angle=(j*2*Math.PI/n)-Math.PI/2;
+    const rad=r*(vals[j]/100);
+    const x=cx+rad*Math.cos(angle);
+    const y=cy+rad*Math.sin(angle);
+    j===0?ctx2.moveTo(x,y):ctx2.lineTo(x,y);
+  }
+  ctx2.closePath();
+  ctx2.fillStyle='rgba(0,212,255,.08)';
+  ctx2.fill();
+  ctx2.strokeStyle='rgba(0,212,255,.7)';
+  ctx2.lineWidth=1.5;
+  ctx2.stroke();
+  // Points
+  for(let j=0;j<n;j++){
+    const angle=(j*2*Math.PI/n)-Math.PI/2;
+    const rad=r*(vals[j]/100);
+    const x=cx+rad*Math.cos(angle);
+    const y=cy+rad*Math.sin(angle);
+    ctx2.beginPath();
+    ctx2.arc(x,y,4,0,Math.PI*2);
+    ctx2.fillStyle=colors[j];
+    ctx2.fill();
+  }
+  // Labels
+  ctx2.font='500 11px "Share Tech Mono"';
+  ctx2.textAlign='center';
+  for(let j=0;j<n;j++){
+    const angle=(j*2*Math.PI/n)-Math.PI/2;
+    const lx=cx+(r+24)*Math.cos(angle);
+    const ly=cy+(r+24)*Math.sin(angle);
+    ctx2.fillStyle=colors[j];
+    const lines=cats[j].split('\n');
+    lines.forEach((line,li)=>ctx2.fillText(line,lx,ly+(li*14)-(lines.length-1)*7));
+  }
+}
+drawRadar();
+
+// ─── ARCH DIAGRAM SVG LINES ───
+function drawArchLines(){
+  const svg=document.getElementById('arch-svg');
+  if(!svg) return;
+  const container=svg.parentElement;
+  const getCenter=id=>{
+    const el=document.getElementById(id);
+    if(!el) return null;
+    const pr=container.getBoundingClientRect();
+    const er=el.getBoundingClientRect();
+    return{x:er.left-pr.left+er.width/2,y:er.top-pr.top+er.height/2};
+  };
+  const connections=[
+    ['an-user','an-cf'],['an-cf','an-s3'],['an-cf','an-apigw'],['an-cf','an-r53'],
+    ['an-apigw','an-lambda'],['an-apigw','an-sns'],['an-lambda','an-db'],['an-sns','an-db']
+  ];
+  svg.innerHTML='';
+  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  const marker=document.createElementNS('http://www.w3.org/2000/svg','marker');
+  marker.setAttribute('id','a'); marker.setAttribute('viewBox','0 0 10 10');
+  marker.setAttribute('refX','8'); marker.setAttribute('refY','5');
+  marker.setAttribute('markerWidth','6'); marker.setAttribute('markerHeight','6');
+  marker.setAttribute('orient','auto-start-reverse');
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d','M2 1L8 5L2 9'); path.setAttribute('fill','none');
+  path.setAttribute('stroke','rgba(0,212,255,0.5)'); path.setAttribute('stroke-width','1.5');
+  marker.appendChild(path); defs.appendChild(marker); svg.appendChild(defs);
+  connections.forEach(([a,b])=>{
+    const p1=getCenter(a); const p2=getCenter(b);
+    if(!p1||!p2) return;
+    const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',p1.x); line.setAttribute('y1',p1.y);
+    line.setAttribute('x2',p2.x); line.setAttribute('y2',p2.y);
+    line.setAttribute('stroke','rgba(0,212,255,0.25)');
+    line.setAttribute('stroke-width','1');
+    line.setAttribute('stroke-dasharray','4 4');
+    line.setAttribute('marker-end','url(#a)');
+    svg.appendChild(line);
+  });
+}
+setTimeout(drawArchLines,500);
+window.addEventListener('resize',drawArchLines);
+
+// ─── TERMINAL ───
+const commands={
+  help:{output:[
+    {t:'blue',txt:'Available commands:'},
+    {t:'green',txt:'  skills        — View technical competencies'},
+    {t:'green',txt:'  certs         — List certifications'},
+    {t:'green',txt:'  projects      — Show deployed systems'},
+    {t:'green',txt:'  about         — Engineer profile'},
+    {t:'green',txt:'  contact       — Get in touch'},
+    {t:'green',txt:'  aws           — AWS services knowledge'},
+    {t:'green',txt:'  whoami        — Identity check'},
+    {t:'green',txt:'  clear         — Clear terminal'},
+  ]},
+  whoami:{output:[
+    {t:'white',txt:'Kay Kelebogile Maditse'},
+    {t:'blue', txt:'Role     : Cloud Engineer | Junior Web Developer Intern'},
+    {t:'blue', txt:'Location : Johannesburg, Gauteng, South Africa'},
+    {t:'blue', txt:'Status   : Open to Cloud Learnerships'},
+    {t:'green',txt:'Clearance: AWS Certified Cloud Practitioner'},
+  ]},
+  skills:{output:[
+    {t:'amber',txt:'[ CLOUD ]      Lambda · S3 · DynamoDB · API Gateway · CloudFront · Route 53'},
+    {t:'purple',txt:'[ DEVOPS ]     GitHub · CodePipeline · CodeBuild · CI/CD · IaC'},
+    {t:'green',txt:'[ OS/LINUX ]   Bash · CLI · Shell Scripting · Process Management'},
+    {t:'blue', txt:'[ NETWORKING ] DNS · TCP/IP · VPC · Subnets · CIDR · Firewalls'},
+    {t:'white',txt:'[ DEV ]        Python · JavaScript · HTML · CSS · Node.js'},
+  ]},
+  certs:{output:[
+    {t:'green',txt:'✓ AWS Certified Cloud Practitioner'},
+    {t:'green',txt:'✓ AWS re/Start Graduate'},
+    {t:'green',txt:'✓ Full Stack JavaScript Developer (Coursera)'},
+    {t:'green',txt:'✓ Python Programming Certification (Coursera)'},
+    {t:'green',txt:'✓ AI & Quality Assurance Certificate'},
+    {t:'green',txt:'✓ Full Stack Developer Apprenticeship (Umuzi Academy)'},
+    {t:'blue', txt:'↳ In Progress: AWS Solutions Architect Associate'},
+  ]},
+  projects:{output:[
+    {t:'blue', txt:'01 · Intelligent Contact & Enquiry Engine       [Lambda · SES · API GW]'},
+    {t:'blue', txt:'02 · Global Visitor Telemetry System            [DynamoDB · Lambda]'},
+    {t:'amber',txt:'03 · Serverless Banking Alert & Fraud System   [Lambda · SNS · DynamoDB]'},
+    {t:'purple',txt:'04 · Secure Cloud File Upload Portal           [S3 · CloudFront · IAM]'},
+    {t:'green',txt:'05 · Automated Cloud Deployment Pipeline       [CodePipeline · CodeBuild]'},
+    {t:'green',txt:'06 · AWS Cloud Knowledge Assessment Engine     [DynamoDB · Lambda]'},
+  ]},
+  contact:{output:[
+    {t:'blue', txt:'Email    : maditse.kay.kelebogile@gmail.com'},
+    {t:'blue', txt:'LinkedIn : linkedin.com/in/kay-maditse'},
+    {t:'blue', txt:'GitHub   : github.com/kay-maditse'},
+    {t:'muted',txt:'Location : Johannesburg, Gauteng, South Africa'},
+  ]},
+  aws:{output:[
+    {t:'amber',txt:'COMPUTE   : Lambda (serverless) · EC2 · Elastic Beanstalk'},
+    {t:'blue', txt:'STORAGE   : S3 · DynamoDB · RDS'},
+    {t:'green',txt:'NETWORK   : VPC · Route 53 · CloudFront · API Gateway'},
+    {t:'purple',txt:'SECURITY  : IAM · Cognito · Security Groups · KMS'},
+    {t:'white', txt:'OPS       : CloudWatch · EventBridge · SNS · SES · CodePipeline'},
+  ]},
+  about:{output:[
+    {t:'white',txt:'Cloud engineer driven by scalability, automation, and innovation.'},
+    {t:'muted',txt:'Fascinated by serverless architecture and event-driven systems.'},
+    {t:'blue', txt:'AWS re/Start Graduate | Cloud Practitioner Certified'},
+    {t:'blue', txt:'Currently: Junior Web Developer Intern @ CAPACITI'},
+    {t:'green',txt:'Goal: Solutions Architect | Aspiring CTO'},
+  ]},
+};
+function openTerminal(){document.getElementById('terminal-modal').classList.add('open');document.getElementById('terminal-input').focus();}
+function closeTerminal(){document.getElementById('terminal-modal').classList.remove('open');}
+document.getElementById('terminal-modal').addEventListener('click',e=>{if(e.target===document.getElementById('terminal-modal'))closeTerminal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTerminal();});
+document.getElementById('terminal-input').addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  const val=e.target.value.trim().toLowerCase();
+  e.target.value='';
+  const out=document.getElementById('terminal-output');
+  const prompt=document.createElement('div');
+  prompt.className='t-line';
+  prompt.innerHTML=`<span class="t-green">kay@portfolio:~$</span> <span class="t-white">${val}</span>`;
+  out.appendChild(prompt);
+  if(val==='clear'){out.innerHTML='';return;}
+  const cmd=commands[val];
+  if(cmd){
+    cmd.output.forEach(line=>{
+      const d=document.createElement('div');
+      d.className=`t-line t-${line.t}`;
+      d.textContent=line.txt;
+      out.appendChild(d);
+    });
+  } else if(val===''){
+    // do nothing
+  } else {
+    const d=document.createElement('div');
+    d.className='t-line t-muted';
+    d.innerHTML=`Command not found: <span class="t-blue">${val}</span>. Type <span class="t-blue">help</span> for options.`;
+    out.appendChild(d);
+  }
+  const br=document.createElement('div');
+  br.className='t-line'; br.innerHTML='&nbsp;';
+  out.appendChild(br);
+  out.scrollTop=out.scrollHeight;
+});
+</script>
+</body>
+</html>
