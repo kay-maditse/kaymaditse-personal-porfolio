@@ -1,0 +1,207 @@
+/* ─────────────────────────────────────────
+   HERO.CSS — Boot Screen, Orbit, Typewriter
+   ───────────────────────────────────────── */
+
+/* ─── Hero Section ─── */
+#hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* ─── Scanning Line ─── */
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--blue), transparent);
+  animation: scan 4s linear infinite;
+  opacity: 0.4;
+}
+@keyframes scan { 0% { top: 0; } 100% { top: 100vh; } }
+
+/* ─── Grid Overlay ─── */
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridPulse 8s ease-in-out infinite;
+}
+@keyframes gridPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+/* ─── Orbit Rings ─── */
+.orbit-container {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+}
+
+.orbit {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.orbit-1 {
+  width: 300px; height: 300px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: orbitSpin 20s linear infinite;
+}
+
+.orbit-2 {
+  width: 450px; height: 450px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: orbitSpin 35s linear infinite reverse;
+}
+
+.orbit-3 {
+  width: 580px; height: 580px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  animation: orbitSpin 50s linear infinite;
+}
+
+@keyframes orbitSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+.orbit-icon {
+  position: absolute;
+  font-size: 1.2rem;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 0 6px var(--blue));
+  animation: counterSpin 20s linear infinite;
+}
+.orbit-icon-2 { animation: counterSpin 35s linear infinite reverse; }
+.orbit-icon-3 { animation: counterSpin 50s linear infinite; }
+@keyframes counterSpin { to { transform: translateX(-50%) rotate(-360deg); } }
+
+/* ─── Boot Screen ─── */
+#boot-screen {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 4rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+}
+
+.boot-line {
+  color: var(--green);
+  opacity: 0;
+  margin: 0.3rem 0;
+  animation: bootIn 0.1s forwards;
+}
+.boot-line.blue  { color: var(--blue); }
+.boot-line.white { color: #fff; }
+.boot-line.dim   { color: var(--muted); }
+
+@keyframes bootIn { to { opacity: 1; } }
+
+#boot-screen.done { animation: fadeOutBoot 0.8s forwards; }
+@keyframes fadeOutBoot { to { opacity: 0; pointer-events: none; } }
+
+/* ─── Hero Content ─── */
+#hero-content {
+  position: relative;
+  z-index: 10;
+  opacity: 0;
+  animation: heroReveal 1s ease forwards;
+}
+
+@keyframes heroReveal {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--blue);
+  letter-spacing: 0.3em;
+  margin-bottom: 2rem;
+  opacity: 0.8;
+}
+
+.hero-name {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #fff 0%, var(--blue) 50%, var(--purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.3));
+}
+
+.hero-typewriter {
+  font-family: var(--font-mono);
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  color: var(--blue);
+  height: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.typewriter-text {
+  border-right: 2px solid var(--blue);
+  padding-right: 4px;
+  animation: blink 0.7s step-end infinite;
+}
+@keyframes blink { 50% { border-color: transparent; } }
+
+.hero-tagline {
+  font-family: var(--font-display);
+  font-size: clamp(0.7rem, 1.5vw, 1rem);
+  letter-spacing: 0.3em;
+  color: var(--muted);
+  margin-bottom: 3rem;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ─── Scroll Hint ─── */
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+@keyframes scrollBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+
+.scroll-arrow {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(var(--blue), transparent);
+}

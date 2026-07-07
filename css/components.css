@@ -1,0 +1,150 @@
+/* ─────────────────────────────────────────
+   COMPONENTS.CSS — Reusable UI Elements
+   ───────────────────────────────────────── */
+
+/* ─── Glitch Effect ─── */
+.glitch { position: relative; }
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-display);
+}
+
+.glitch::before {
+  color: var(--blue);
+  animation: glitch1 4s infinite;
+  clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+}
+
+.glitch::after {
+  color: var(--purple);
+  animation: glitch2 4s infinite;
+  clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+}
+
+@keyframes glitch1 {
+  0%, 95%, 100% { transform: translateX(0); }
+  96% { transform: translateX(-3px); }
+  98% { transform: translateX(3px); }
+}
+
+@keyframes glitch2 {
+  0%, 95%, 100% { transform: translateX(0); }
+  97% { transform: translateX(3px); }
+  99% { transform: translateX(-3px); }
+}
+
+/* ─── Glass Card ─── */
+.glass-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--blue), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.glass-card:hover {
+  border-color: rgba(0, 212, 255, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0, 212, 255, 0.1);
+}
+
+.glass-card:hover::before { opacity: 1; }
+
+/* ─── Corner Brackets ─── */
+.bracket {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-color: var(--blue);
+  border-style: solid;
+  opacity: 0.5;
+}
+.bracket.tl { top: 8px; left: 8px; border-width: 1px 0 0 1px; }
+.bracket.tr { top: 8px; right: 8px; border-width: 1px 1px 0 0; }
+.bracket.bl { bottom: 8px; left: 8px; border-width: 0 0 1px 1px; }
+.bracket.br { bottom: 8px; right: 8px; border-width: 0 1px 1px 0; }
+
+/* ─── Buttons ─── */
+.btn-primary {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.8rem 2rem;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: #000;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  cursor: none;
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+  transition: filter 0.3s, transform 0.2s;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.2);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  padding: 0.8rem 2rem;
+  border: 1px solid var(--blue);
+  color: var(--blue);
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  cursor: none;
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+  transition: all 0.3s;
+}
+
+.btn-outline:hover { background: rgba(0, 212, 255, 0.1); }
+
+/* ─── Tags ─── */
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid rgba(0, 212, 255, 0.2);
+  color: var(--blue);
+  letter-spacing: 0.1em;
+}
+.tag.purple { border-color: rgba(168, 85, 247, 0.3); color: var(--purple); }
+.tag.green  { border-color: rgba(0, 255, 136, 0.2);  color: var(--green); }
+.tag.amber  { border-color: rgba(255, 170, 0, 0.2);  color: var(--amber); }
+
+/* ─── Status Dot ─── */
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  display: inline-block;
+  margin-right: 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.4); }
+  50%       { opacity: 0.8; box-shadow: 0 0 0 6px transparent; }
+}

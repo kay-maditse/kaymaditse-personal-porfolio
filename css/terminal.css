@@ -1,0 +1,95 @@
+/* ─────────────────────────────────────────
+   TERMINAL.CSS — Terminal Modal
+   ───────────────────────────────────────── */
+
+#terminal-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+}
+
+#terminal-modal.open { display: flex; }
+
+.terminal-window {
+  width: min(700px, 90vw);
+  background: #000;
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  font-family: var(--font-mono);
+  box-shadow: 0 0 60px rgba(0, 212, 255, 0.15);
+}
+
+.terminal-title-bar {
+  padding: 0.6rem 1rem;
+  background: rgba(0, 212, 255, 0.07);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.terminal-dots { display: flex; gap: 0.4rem; }
+.terminal-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.t-dot-r { background: #ff5f57; }
+.t-dot-y { background: #ffbd2e; }
+.t-dot-g { background: #28c840; }
+
+.terminal-title-text {
+  font-size: 0.7rem;
+  color: var(--blue);
+  letter-spacing: 0.15em;
+}
+
+.terminal-close {
+  font-size: 1rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: none;
+}
+
+.terminal-close:hover { color: #fff; }
+
+.terminal-body {
+  padding: 1.5rem;
+  height: 380px;
+  overflow-y: auto;
+  font-size: 0.82rem;
+}
+
+.t-line { margin: 0.2rem 0; line-height: 1.6; }
+.t-green  { color: var(--green); }
+.t-blue   { color: var(--blue); }
+.t-white  { color: #fff; }
+.t-muted  { color: var(--muted); }
+.t-purple { color: var(--purple); }
+.t-amber  { color: var(--amber); }
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.terminal-prompt {
+  color: var(--green);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+#terminal-input {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  flex: 1;
+  outline: none;
+  caret-color: var(--blue);
+}
